@@ -28,4 +28,10 @@ urlpatterns = [
     path('api/v1/reviews/', views.review_list_api_view),
     path('api/v1/reviews/<int:id>/', views.review_detail_api_view),
     path('api/v1/products/reviews/', views.product_reviews_with_rating),
+    path('api/v1/categories/', views.create_category),
+    path('api/v1/categories/<int:id>/', views.update_delete_category),
+    path('api/v1/products/', views.create_product),
+    path('api/v1/products/<int:id>/', views.update_delete_product),
+    path('api/v1/reviews/', views.create_review),
+    path('api/v1/reviews/<int:id>/', views.update_delete_review),
 ]
