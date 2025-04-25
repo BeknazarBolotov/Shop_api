@@ -34,4 +34,7 @@ urlpatterns = [
     path('api/v1/products/<int:id>/', views.update_delete_product),
     path('api/v1/reviews/', views.create_review),
     path('api/v1/reviews/<int:id>/', views.update_delete_review),
+    path('api/v1/users/register/', views.registration_api_view),
+    path('api/v1/users/confirm/', views.confirm_user_view),
+    path('api/v1/users/login/', views.login_view),
 ]

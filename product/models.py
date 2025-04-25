@@ -1,5 +1,24 @@
 from django.db import models
 from django.db.models import Avg
+import random
+import string
+
+def generate_code():
+    return ''.join(random.choices(string.digits, k=6))
+
+class User(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.username
+
+class ConfirmationCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='confirmation_code')
+    code = models.CharField(max_length=6, default=generate_code)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)

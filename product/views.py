@@ -1,8 +1,91 @@
+from django.template.context_processors import request
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework import status
-from .models import Category, Product, Review
-from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer, ProductWithReviewsSerializer
+from .models import Category, Product, Review, User, ConfirmationCode
+from django.contrib.auth.hashers import check_password
+import random
+from .serializers import (
+    CategorySerializer,
+    ProductSerializer,
+    ReviewSerializer,
+    ProductWithReviewsSerializer,
+    LoginSerializer,
+    RegisterSerializer,
+    ConfirmCodeSerializer,
+)
+
+@api_view(['POST'])
+def registration_api_view(request):
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    username = serializer.validated_data.get('username')
+    email = serializer.validated_data.get('email')
+    password = serializer.validated_data.get('password')
+
+    user = User.objects.create(
+        username=username,
+        email=email,
+        password=password,
+        is_active=False
+    )
+
+    code = f"{random.randint(100000, 999999)}"
+    ConfirmationCode.objects.create(user=user, code=code)
+
+    return Response(
+        status=status.HTTP_201_CREATED,
+        data={'user_id': user.id, 'confirmation_code': code}
+    )
+
+
+@api_view(['POST'])
+def confirm_user_view(request):
+    serializer = ConfirmCodeSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    username = serializer.validated_data.get('username')
+    code = serializer.validated_data.get('code')
+
+    try:
+        user = User.objects.get(username=username)
+        if user.confirmation_code.code != code:
+            return Response({'error': 'Неверный код'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.is_active = True
+        user.save()
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({'message': 'Пользователь подтверждён', 'token': token.key})
+    except User.DoesNotExist:
+        return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def login_view(request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    username = serializer.validated_data.get('username')
+    password = serializer.validated_data.get('password')
+
+    try:
+        user = User.objects.get(username=username)
+        if not user.is_active:
+            return Response({'error': 'Пользователь не подтверждён'}, status=status.HTTP_403_FORBIDDEN)
+        if not check_password(password, user.password):
+            return Response({'error': 'Неверный пароль'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
+    except User.DoesNotExist:
+        return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
 
 
 @api_view(['POST'])
