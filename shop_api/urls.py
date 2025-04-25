@@ -1,40 +1,19 @@
-"""
-URL configuration for shop_api project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from product import views
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/categories/', views.category_list_api_view),
-    path('api/v1/categories/<int:id>/', views.category_detail_api_view),
-    path('api/v1/products/', views.product_list_api_view),
-    path('api/v1/products/<int:id>/', views.product_detail_api_view),
-    path('api/v1/reviews/', views.review_list_api_view),
-    path('api/v1/reviews/<int:id>/', views.review_detail_api_view),
-    path('api/v1/products/reviews/', views.product_reviews_with_rating),
-    path('api/v1/categories/', views.create_category),
-    path('api/v1/categories/<int:id>/', views.update_delete_category),
-    path('api/v1/products/', views.create_product),
-    path('api/v1/products/<int:id>/', views.update_delete_product),
-    path('api/v1/reviews/', views.create_review),
-    path('api/v1/reviews/<int:id>/', views.update_delete_review),
-    path('api/v1/users/register/', views.registration_api_view),
-    path('api/v1/users/confirm/', views.confirm_user_view),
-    path('api/v1/users/login/', views.login_view),
+
+    # User auth
+    path('api/v1/users/register/', views.RegistrationAPIView.as_view()),
+    path('api/v1/users/confirm/', views.ConfirmUserAPIView.as_view()),
+    path('api/v1/users/login/', views.LoginAPIView.as_view()),
+    path('api/v1/categories/', views.CategoryListCreateAPIView.as_view()),
+    path('api/v1/categories/<int:id>/', views.CategoryDetailAPIView.as_view()),
+    path('api/v1/products/', views.ProductListCreateAPIView.as_view()),
+    path('api/v1/products/<int:id>/', views.ProductDetailAPIView.as_view()),
+    path('api/v1/reviews/', views.ReviewListCreateAPIView.as_view()),
+    path('api/v1/reviews/<int:id>/', views.ReviewDetailAPIView.as_view()),
+    path('api/v1/products/reviews/', views.ProductWithReviewsAPIView.as_view()),
 ]
